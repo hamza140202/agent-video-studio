@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agent-video-studio"
+version = "1.0.0"
+description = "Multi-agent system that turns a content idea + source TikToks into a publish-ready YouTube compilation video (16:9, blurred background, centered vertical source)."
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+authors = [
+    {name = "ansaribilal1402", email = "noreply@github.com"},
+]
+keywords = ["video", "editor", "compilation", "tiktok", "youtube", "agents", "cli", "ffmpeg", "multi-agent"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Multimedia :: Video",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "httpx>=0.27,<1.0",
+    "pydantic>=2.7,<3.0",
+    "rich>=13.0,<14.0",
+    "click>=8.1,<9.0",
+    "structlog>=24.0",
+    "agent-video-downloader>=1.2.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/hamza140202/agent-video-studio"
+Repository = "https://github.com/hamza140202/agent-video-studio"
+Documentation = "https://github.com/hamza140202/agent-video-studio#readme"
+Bug-Tracker = "https://github.com/hamza140202/agent-video-studio/issues"
+
+[project.scripts]
+avs = "avs.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

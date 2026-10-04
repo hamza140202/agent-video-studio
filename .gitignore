@@ -1,0 +1,36 @@
+# Build artifacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+
+# Output
+output/
+downloads/raw/
+downloads/edited/
+downloads/final/
+downloads/reference/*.mp4
+downloads/reference/*.info.json
+downloads/reference/*.jpg
+downloads/reference/*.webp
+*.mp4
+*.mkv
+*.mov
+!tests/fixtures/*.mp4
+
+# Batch input files (gitignored to prevent leaking test content)
+batch_input.txt
+batch_ahyeon.txt
+*_batch_urls.txt
+urls.txt
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+.env
