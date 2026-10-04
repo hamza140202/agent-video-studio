@@ -51,19 +51,31 @@ class DefaultDirector:
     async def produce(self, brief: str, *, urls_file: Path | None = None,
                       urls: list[str] | None = None,
                       reference_path: Path | None = None,
-                      output_dir: Path = Path("./output")) -> StudioResult:
+                      output_dir: Path = Path("./output"),
+                      auto_discover: bool = True,
+                      max_results: int = 25) -> StudioResult:
         started = datetime.utcnow()
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
 
-        log.info("director_start", brief=brief)
+        log.info("director_start", brief=brief, auto_discover=auto_discover)
 
         # Stage 1: Research (download source clips)
+        # If explicit URLs provided, use AvdResearcher; otherwise use AutoDiscoveryResearcher
         log.info("director_research_start")
-        research: ResearchReport = await self.researcher.research(
-            brief, urls_file=urls_file, urls=urls,
-            dest=output_dir / "raw"
-        )
+        if urls_file or urls:
+            research: ResearchReport = await self.researcher.research(
+                brief, urls_file=urls_file, urls=urls,
+                dest=output_dir / "raw"
+            )
+        elif auto_discover:
+            from avs.agents.auto_discovery import AutoDiscoveryResearcher
+            auto_researcher = AutoDiscoveryResearcher()
+            research = await auto_researcher.research(
+                brief, dest=output_dir / "raw", max_results=max_results
+            )
+        else:
+            research = ResearchReport(brief=brief, clips=[], notes="no URLs provided and auto_discover=False")
         if not research.clips:
             return StudioResult(
                 brief=brief, status="failed",

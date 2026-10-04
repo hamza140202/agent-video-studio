@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agent-video-studio"
-version = "1.0.0"
+version = "1.1.0"
 description = "Multi-agent system that turns a content idea + source TikToks into a publish-ready YouTube compilation video (16:9, blurred background, centered vertical source)."
 readme = "README.md"
 license = {text = "MIT"}

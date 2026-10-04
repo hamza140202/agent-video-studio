@@ -25,22 +25,32 @@ def cli() -> None:
 
 @cli.command()
 @click.argument("brief")
-@click.option("--urls-file", "-u", type=click.Path(exists=True), help="File with one URL per line")
+@click.option("--urls-file", "-u", type=click.Path(exists=True), help="File with one URL per line (skips auto-discovery)")
 @click.option("--reference", "-r", type=click.Path(exists=True), help="Reference video for style analysis (optional)")
 @click.option("--output-dir", "-o", default="./output", help="Output directory")
+@click.option("--max-results", default=25, help="Max URLs to auto-discover (default 25)")
+@click.option("--no-auto-discover", is_flag=True, help="Disable auto-discovery (requires --urls-file)")
 @click.option("--json", "as_json", is_flag=True, help="Output JSON result to stdout")
+@click.option("--send-telegram", is_flag=True, help="Send final video to Telegram (requires AVS_TG_BOT_TOKEN + AVS_TG_CHAT_ID env vars)")
 def run(brief: str, urls_file: str | None, reference: str | None,
-        output_dir: str, as_json: bool) -> None:
+        output_dir: str, max_results: int, no_auto_discover: bool,
+        as_json: bool, send_telegram: bool) -> None:
     """Produce a final compilation video from a content brief.
 
     BRIEF is the content idea, e.g. "Ahyeon September best of TikTok compilation".
+
+    If --urls-file is provided, the system downloads those URLs directly.
+    Otherwise, the AutoDiscoveryResearcher searches the web for TikTok URLs
+    matching the brief, verifies each via TikWM, and downloads the top N.
 
     The Director orchestrates Researcher → StyleAnalyst → Editor → Critic → Publisher
     to produce a final YouTube-ready MP4.
 
     Examples:
-      avs run "Best of Ahyeon TikTok September" --urls-file urls.txt
-      avs run "Sad edits compilation" --urls-file urls.txt --reference ref.mp4
+      avs run "Best of Ahyeon TikTok September"  # auto-discover URLs
+      avs run "Best of Ahyeon TikTok September" --urls-file urls.txt  # explicit URLs
+      avs run "Sad edits compilation" --reference ref.mp4  # use reference style
+      avs run "Best of Ahyeon TikTok September" --send-telegram  # send to Telegram
     """
     from avs.director import DefaultDirector
 
@@ -50,6 +60,8 @@ def run(brief: str, urls_file: str | None, reference: str | None,
         urls_file=Path(urls_file) if urls_file else None,
         reference_path=Path(reference) if reference else None,
         output_dir=Path(output_dir),
+        auto_discover=not no_auto_discover,
+        max_results=max_results,
     ))
 
     if as_json:
@@ -67,6 +79,14 @@ def run(brief: str, urls_file: str | None, reference: str | None,
                 f"[dim]Clips used:[/] {result.clips_used}",
                 title="avs run — success", border_style="green",
             ))
+            # Optionally send to Telegram
+            if send_telegram:
+                from avs.utils.telegram import send_video_to_telegram
+                tg_ok, tg_msg = asyncio.run(send_video_to_telegram(result.final_video_path, brief))
+                if tg_ok:
+                    console.print(f"[green]✅ Sent to Telegram:[/] {tg_msg}")
+                else:
+                    console.print(f"[red]❌ Telegram send failed:[/] {tg_msg}")
         else:
             console.print(Panel.fit(
                 f"[bold red]❌ Failed[/]\n[dim]Brief:[/] {brief}\n[red]Error:[/] {result.error}",
