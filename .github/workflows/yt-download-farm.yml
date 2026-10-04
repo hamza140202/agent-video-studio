@@ -57,12 +57,12 @@ jobs:
           echo "deb [signed-by=/usr/share/keyrings/cloudflare-warp-archive-keyring.gpg] https://pkg.cloudflareclient.com/ $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/cloudflare-client.list
           sudo apt-get update -qq
           sudo apt-get install -y cloudflare-warp
-          warp-cli registration new || true
-          warp-cli mode proxy
-          warp-cli connect
+          warp-cli registration new --accept-tos || true
+          warp-cli --accept-tos mode proxy
+          warp-cli --accept-tos connect
           sleep 3
           echo "WARP status:"
-          warp-cli status
+          warp-cli --accept-tos status
           echo "Proxy: http://127.0.0.1:40000"
 
       - name: Set up Python
